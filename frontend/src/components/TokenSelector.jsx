@@ -1,12 +1,11 @@
-
 import { useState } from "react";
 
 // Update with real deployed addresses
 const tokenList = [
-  { symbol: "TKA", address: "0x9e53abdDBFa9DC6A9bCD9D0e5DD7144F2701718D" },
-  { symbol: "TKB", address: "0x1e792D4c34c3d04Bd127aFEf0c1696E912c755aa" },
-  { symbol: "USDT", address: "0x2A07A0013877e3bcCDd42Da8171457B0B54EB54d" },
-  { symbol: "MOO", address: "0x2AaF51745dbf59938fD364F08f06E6d8B34f4b49" },
+  { symbol: "TKA", address: "0x8b0C1326D16eC18B7af6F75A352Cb0fFe8862e44" },
+  { symbol: "TKB", address: "0xae9e16b1fa7FA2962Ade8758c171E619f780f516" },
+  { symbol: "USDT", address: "0xC832785d6b0207708c4b7D1f1c2cF7809268d7e3" },
+  { symbol: "MOO", address: "0x9ce3BF7A31512c143Aad88BC92E1899b2FD862Dc" },
 ];
 
 export default function TokenSelector({ selected, onSelect }) {

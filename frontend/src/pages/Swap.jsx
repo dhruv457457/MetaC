@@ -1,42 +1,32 @@
 import { useEffect, useState } from "react";
-import TokenSelector from "../components/TokenSelector";
-import ActionButton from "../components/ActionButton";
-import TransactionList from "../components/TransactionList";
-
+import { useWallet } from "../contexts/WalletContext";
+import { showSuccess, showError, showWarning } from "../utils/toast";
 import { getPairAddress, getReserves, swap } from "../utils/contractUtils";
+import { getAllUserSwaps } from "../utils/transactionLog";
+
+import SwapForm from "../components/swap/SwapForm";
+import SwapChart from "../components/swap/SwapChart";
+import RecentTransactions from "../components/swap/RecentTransactions";
 import { ethers } from "ethers";
 
 export default function Swap() {
+  const { address, isConnected } = useWallet();
+
   const [tokenA, setTokenA] = useState(null);
   const [tokenB, setTokenB] = useState(null);
   const [amountIn, setAmountIn] = useState("");
   const [amountOut, setAmountOut] = useState("");
   const [pairAddress, setPairAddress] = useState(null);
+
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [priceHistory, setPriceHistory] = useState([]);
+
   const [loading, setLoading] = useState(false);
-  const [userAddress, setUserAddress] = useState(null);
-const [transactions, setTransactions] = useState([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
 
-useEffect(() => {
-  const fetchAddressAndTxs = async () => {
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
-      setUserAddress(address);
-
-      if (pairAddress) {
-        const txs = await getUserTransactions(pairAddress, address);
-        setTransactions(txs);
-      }
-    } catch (err) {
-      console.error("Failed to fetch address or txs:", err);
-    }
-  };
-  fetchAddressAndTxs();
-}, [pairAddress]);
-
+  // Estimate amountOut
   useEffect(() => {
-    const fetchEstimates = async () => {
+    const fetchEstimate = async () => {
       if (tokenA && tokenB && amountIn) {
         try {
           const pair = await getPairAddress(tokenA.address, tokenB.address);
@@ -48,25 +38,17 @@ useEffect(() => {
 
           setPairAddress(pair);
           const { reserveA, reserveB } = await getReserves(pair);
-
-          let inputReserve, outputReserve;
-          if (tokenA.address.toLowerCase() < tokenB.address.toLowerCase()) {
-            inputReserve = reserveA;
-            outputReserve = reserveB;
-          } else {
-            inputReserve = reserveB;
-            outputReserve = reserveA;
-          }
+          const [inputReserve, outputReserve] =
+            tokenA.address.toLowerCase() < tokenB.address.toLowerCase()
+              ? [reserveA, reserveB]
+              : [reserveB, reserveA];
 
           const input = parseFloat(amountIn);
           const inputWithFee = input * 997;
-          const numerator = inputWithFee * outputReserve;
-          const denominator = inputReserve * 1000 + inputWithFee;
-          const output = numerator / denominator;
-
+          const output =
+            (inputWithFee * outputReserve) / (inputReserve * 1000 + inputWithFee);
           setAmountOut(output.toFixed(6));
-        } catch (err) {
-          console.error("Estimation failed:", err);
+        } catch {
           setAmountOut("0.0");
         }
       } else {
@@ -74,23 +56,65 @@ useEffect(() => {
       }
     };
 
-    fetchEstimates();
+    fetchEstimate();
   }, [tokenA, tokenB, amountIn]);
+
+  // Fetch recent txs & price history
+  const fetchTransactions = async () => {
+    setLoadingTransactions(true);
+    try {
+      const allTxs = await getAllUserSwaps(null, 100); // all pairs, all users
+
+      // Filter relevant pair
+      const filteredTxs = allTxs.filter(
+        (tx) =>
+          (tx.inputTokenSymbol === tokenA?.symbol &&
+            tx.outputTokenSymbol === tokenB?.symbol) ||
+          (tx.inputTokenSymbol === tokenB?.symbol &&
+            tx.outputTokenSymbol === tokenA?.symbol)
+      );
+
+      const processed = filteredTxs.map((tx) => {
+        const price =
+          tx.inputTokenSymbol === tokenA?.symbol
+            ? parseFloat(tx.outputAmount) / parseFloat(tx.inputAmount)
+            : parseFloat(tx.inputAmount) / parseFloat(tx.outputAmount);
+
+        return {
+          timestamp: tx.timestamp,
+          price,
+          volume: parseFloat(tx.inputAmount),
+        };
+      });
+
+      setRecentTransactions(filteredTxs.slice(0, 5));
+      setPriceHistory(processed.sort((a, b) => a.timestamp - b.timestamp));
+    } catch (err) {
+      console.error("Error fetching txs:", err);
+    } finally {
+      setLoadingTransactions(false);
+    }
+  };
+
+  useEffect(() => {
+    if (tokenA && tokenB) fetchTransactions();
+  }, [address, tokenA, tokenB]);
 
   const handleSwap = async () => {
     if (!tokenA || !tokenB || !amountIn || !pairAddress) {
-      alert("Please fill all fields.");
+      showWarning("Please fill all fields.");
       return;
     }
 
     try {
       setLoading(true);
-      const parsedAmountIn = ethers.parseUnits(amountIn, 18);
-      await swap(pairAddress, parsedAmountIn, tokenA.address);
-      alert("✅ Swap successful!");
+      const parsedIn = ethers.parseUnits(amountIn, 18);
+      await swap(pairAddress, parsedIn, tokenA.address);
+      showSuccess("Swap successful!");
+      fetchTransactions(); // refresh chart and txs
     } catch (err) {
       console.error("Swap failed:", err);
-      alert("❌ Swap failed.");
+      showError("Swap failed.");
     } finally {
       setLoading(false);
     }
@@ -103,61 +127,48 @@ useEffect(() => {
     setAmountOut("");
   };
 
+  if (!isConnected) {
+    return (
+      <div className="max-w-2xl mx-auto mt-12 text-center text-gray-700">
+        <p className="text-lg font-medium">Please connect your wallet to use MetaCow Swap 🐮</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-xl mx-auto mt-12 p-6 bg-white rounded-2xl shadow-xl border border-purple-100">
-      <h2 className="text-3xl font-extrabold text-center text-purple-700 mb-8">
-        💱 Swap Tokens
-      </h2>
+    <div className="max-w-7xl mx-auto mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Swap Form */}
+      <SwapForm
+        tokenA={tokenA}
+        tokenB={tokenB}
+        amountIn={amountIn}
+        amountOut={amountOut}
+        onAmountInChange={setAmountIn}
+        onTokenAChange={setTokenA}
+        onTokenBChange={setTokenB}
+        onSwitch={handleSwitch}
+        onSwap={handleSwap}
+        loading={loading}
+      />
 
-      <div className="space-y-6">
-        {/* From */}
-        <div className="space-y-2">
-          <label className="block text-gray-600 font-medium">From</label>
-          <TokenSelector selected={tokenA} onSelect={setTokenA} />
-          <input
-            type="number"
-            placeholder="Enter amount"
-            value={amountIn}
-            onChange={(e) => setAmountIn(e.target.value)}
-            className="w-full border border-gray-300 px-4 py-2 rounded-xl bg-gray-50 text-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
-          />
-        </div>
+      {/* Chart */}
+      <SwapChart
+        tokenA={tokenA}
+        tokenB={tokenB}
+        chartData={priceHistory}
+        onRefresh={fetchTransactions}
+        onClearLive={() => setPriceHistory([])}
+        loading={loadingTransactions}
+      />
 
-        {/* Switch */}
-        <div className="flex justify-center">
-          <button
-            onClick={handleSwitch}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-1 rounded-lg text-sm shadow-sm"
-          >
-            ⇅ Switch Tokens
-          </button>
-        </div>
-
-        {/* To */}
-        <div className="space-y-2">
-          <label className="block text-gray-600 font-medium">To</label>
-          <TokenSelector selected={tokenB} onSelect={setTokenB} />
-          <input
-            type="text"
-            placeholder="Estimated output"
-            value={amountOut}
-            disabled
-            className="w-full border border-gray-200 px-4 py-2 rounded-xl bg-gray-100 text-lg text-gray-500 cursor-not-allowed"
-          />
-        </div>
-
-        {/* Swap Button */}
-        <ActionButton
-          text={loading ? "Swapping..." : "Swap"}
-          onClick={handleSwap}
+      {/* Transactions */}
+      <div className="lg:col-span-2">
+        <RecentTransactions
+          address={address}
+          transactions={recentTransactions}
+          onRefresh={fetchTransactions}
+          loading={loadingTransactions}
         />
-
-        {/* Optional message */}
-        {pairAddress && (
-          <p className="text-xs text-gray-400 text-center mt-2">
-            ⚖️ Using pair: <span className="font-mono">{pairAddress.slice(0, 6)}...{pairAddress.slice(-4)}</span>
-          </p>
-        )}
       </div>
     </div>
   );
