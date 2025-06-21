@@ -1,0 +1,344 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0xc555Fe8af1913E6680119869E0ba37f2CA8D4148",
+      "txHash": "0xdf5cc6085972e8c72662795f9c925fb6227c2acdae38bd89fbf38b50106ed692",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xFb40e852d6aA1503e077A6B23d3c824493679F1E",
+      "txHash": "0x80e9e5dd9203a8bfd9a6f803648e8c05a99105914b9368aba984e00fa15e495b",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xDB94CA614c2C9F239fB4028d66cf039c345597D9",
+      "txHash": "0x819581115811ee3273a35f60108b38b724e8d6d7c2eb9a02b78e068d7ce71461",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3D4781D26072B7B23560889f8F64d17019026c04",
+      "txHash": "0xfa99eab133871fb5bd9a7213aa6e90a2e06b9eb81eb2f28a85916a2a208a36b9",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xDA3Bc68E8f125685cDf484F062A8D550Dd993761",
+      "txHash": "0x6f638bedf3011ff4690c545f58e34d874a279f1011b3df400c182b6b7718be86",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "6e466b6e56b45988e22a7a2c1cd383eb296a71f5b5a9d1576accdbedf099d860": {
+      "address": "0xE4e422626a10246C8B19Bd0e0eA0535257BBF91c",
+      "txHash": "0xc1b24c58e244d779a713b4292f93c8e437396f97be2701d538be3de211957d24",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "tokenA",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:11"
+          },
+          {
+            "label": "tokenB",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:12"
+          },
+          {
+            "label": "reserveA",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:14"
+          },
+          {
+            "label": "reserveB",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:15"
+          },
+          {
+            "label": "totalLPSupply",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:16"
+          },
+          {
+            "label": "feeRecipient",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_address",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:19"
+          },
+          {
+            "label": "LPbalances",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:21"
+          },
+          {
+            "label": "userRewardDebt",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:22"
+          },
+          {
+            "label": "claimableRewards",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:23"
+          },
+          {
+            "label": "totalRewardPool",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_uint256",
+            "contract": "MiniDexPairUpgradeable",
+            "src": "contracts\\MiniDexPairUpgradeable.sol:25"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)73_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)13_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)226_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin\\contracts-upgradeable\\utils\\ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "d90e8bd113a01569aeed56cbc4f11e08227e14d684a658c0612c7f1059c6e039": {
+      "address": "0xbd47D8dF6964ef6042f40900ea8274aD88c796d9",
+      "txHash": "0x5e2998ba3a5e008b1e998b577e98c4a26ff35cb2b8c891bc8b18fc7318e85527",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "pairImplementation",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "MiniDexFactoryUpgradeable",
+            "src": "contracts\\MiniDexFactoryUpgradeable.sol:15"
+          },
+          {
+            "label": "getPair",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_address))",
+            "contract": "MiniDexFactoryUpgradeable",
+            "src": "contracts\\MiniDexFactoryUpgradeable.sol:16"
+          },
+          {
+            "label": "allPairs",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_array(t_address)dyn_storage",
+            "contract": "MiniDexFactoryUpgradeable",
+            "src": "contracts\\MiniDexFactoryUpgradeable.sol:17"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)73_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)13_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_address)": {
+            "label": "mapping(address => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_address))": {
+            "label": "mapping(address => mapping(address => address))",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
