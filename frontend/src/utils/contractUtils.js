@@ -148,6 +148,14 @@ export async function claimRewards(pairAddress) {
   const tx = await pair.claimRewards();
   return await tx.wait();
 }
+// ✅ Get claimable rewards for a user
+export async function getClaimableRewards(pairAddress, userAddress) {
+  const { provider } = await getProviderAndSigner();
+  const pair = new ethers.Contract(pairAddress, PAIR_ABI, provider);
+  const reward = await pair.getClaimableRewards(userAddress);
+  return ethers.formatUnits(reward, 18);
+}
+
 export async function getReadOnlyProvider() {
   return new ethers.BrowserProvider(window.ethereum);
 }
