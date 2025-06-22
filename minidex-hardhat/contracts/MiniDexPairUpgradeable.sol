@@ -23,33 +23,13 @@ contract MiniDexPairUpgradeable is Initializable, UUPSUpgradeable, OwnableUpgrad
     mapping(address => uint256) public claimableRewards;
 
     uint256 public totalRewardPool;
-event Swapped(
-  address indexed user,
-  address indexed inputToken,
-  address indexed outputToken,
-  uint256 inputAmount,
-  uint256 outputAmount
-);
+    uint256 public lastVolumeTimestamp;
+    uint256 public volume24h;
 
-event LiquidityAdded(
-  address indexed provider,
-  uint256 amountA,
-  uint256 amountB,
-  uint256 lpMinted
-);
-
-event LiquidityRemoved(
-  address indexed provider,
-  uint256 amountA,
-  uint256 amountB,
-  uint256 lpBurned
-);
-
-event RewardClaimed(
-  address indexed user,
-  uint256 rewardAmount
-);
-
+    event Swapped(address indexed user, address indexed inputToken, address indexed outputToken, uint256 inputAmount, uint256 outputAmount);
+    event LiquidityAdded(address indexed provider, uint256 amountA, uint256 amountB, uint256 lpMinted);
+    event LiquidityRemoved(address indexed provider, uint256 amountA, uint256 amountB, uint256 lpBurned);
+    event RewardClaimed(address indexed user, uint256 rewardAmount);
     event ReserveSynced(uint256 reserveA, uint256 reserveB);
 
     function initialize(address _tokenA, address _tokenB, address _owner) public initializer {
@@ -123,8 +103,18 @@ event RewardClaimed(
         IERC20(outputToken).transfer(msg.sender, outputAmount);
 
         _updateReserve();
+        _updateVolume(inputAmount);
 
-        emit Swapped(msg.sender, inputToken,outputToken, inputAmount,  outputAmount);
+        emit Swapped(msg.sender, inputToken, outputToken, inputAmount, outputAmount);
+    }
+
+    function _updateVolume(uint256 amountIn) internal {
+        if (block.timestamp - lastVolumeTimestamp > 1 days) {
+            volume24h = amountIn;
+            lastVolumeTimestamp = block.timestamp;
+        } else {
+            volume24h += amountIn;
+        }
     }
 
     function claimRewards() external nonReentrant {
@@ -179,7 +169,7 @@ event RewardClaimed(
         return a < b ? a : b;
     }
 
-    // Frontend Getters
+    // -------- Frontend Getters --------
     function getLPBalance(address user) external view returns (uint256) {
         return LPbalances[user];
     }
@@ -192,5 +182,20 @@ event RewardClaimed(
         uint256 userShare = (LPbalances[user] * totalRewardPool) / totalLPSupply;
         uint256 debt = userRewardDebt[user];
         return claimableRewards[user] + (userShare > debt ? userShare - debt : 0);
+    }
+
+    function getTVL() external view returns (uint256) {
+        return reserveA + reserveB;
+    }
+
+    function get24hVolume() external view returns (uint256) {
+        return volume24h;
+    }
+
+    function getAPR() external view returns (uint256) {
+        if (totalLPSupply == 0 || reserveA + reserveB == 0) return 0;
+        uint256 yearlyFees = (volume24h * FEE_RATE / 1000) * 365;
+        uint256 tvl = reserveA + reserveB;
+        return (yearlyFees * 10000) / tvl; // APR in basis points (1250 = 12.5%)
     }
 }
