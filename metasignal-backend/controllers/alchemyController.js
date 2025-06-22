@@ -46,3 +46,14 @@ exports.fetchAndCacheAlchemyTransfers = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.getCachedTransfers = async (req, res) => {
+  try {
+    const pairAddress = req.params.pair.toLowerCase();
+    const transfers = await Transfer.find({ pair: pairAddress }).sort({ timestamp: -1 });
+
+    res.json({ count: transfers.length, transfers });
+  } catch (err) {
+    console.error("❌ Failed to fetch cached transfers:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
