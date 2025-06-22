@@ -172,3 +172,16 @@ export async function getPairContractReadOnly(pairAddress) {
   return { pair, provider }; // ✅ return both
 }
 
+export async function getPoolStats(pairAddress) {
+  const { pair } = await getPairContractReadOnly(pairAddress);
+  const [tvl, volume, apr] = await Promise.all([
+    pair.getTVL(),
+    pair.get24hVolume(),
+    pair.getAPR(),
+  ]);
+  return {
+    tvl: Number(ethers.formatUnits(tvl, 18)),
+    volume: Number(ethers.formatUnits(volume, 18)),
+    apr: Number(apr) / 100, // from basis points to %
+  };
+}

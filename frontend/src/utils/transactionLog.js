@@ -55,8 +55,8 @@ export async function getUserTransactions(pairAddress, userAddress) {
       type: "swap",
       inputToken: log.args.inputToken,
       outputToken: log.args.outputToken,
-      inputAmount: ethers.formatUnits(log.args.inputAmount, 18),
-      outputAmount: ethers.formatUnits(log.args.outputAmount, 18),
+      inputAmount: log.args.inputAmount ? ethers.formatUnits(log.args.inputAmount, 18) : "0.00",
+      outputAmount: log.args.outputAmount ? ethers.formatUnits(log.args.outputAmount, 18) : "0.00",
       timestamp: ts,
       txHash: log.transactionHash,
       blockNumber: log.blockNumber,
@@ -68,8 +68,8 @@ export async function getUserTransactions(pairAddress, userAddress) {
     txs.push({
       type: "liquidity",
       direction: "add",
-      amountA: ethers.formatUnits(log.args.amountA, 18),
-      amountB: ethers.formatUnits(log.args.amountB, 18),
+      amountA: log.args.amountA ? ethers.formatUnits(log.args.amountA, 18) : "0.00",
+      amountB: log.args.amountB ? ethers.formatUnits(log.args.amountB, 18) : "0.00",
       timestamp: ts,
       txHash: log.transactionHash,
     });
@@ -80,7 +80,7 @@ export async function getUserTransactions(pairAddress, userAddress) {
     txs.push({
       type: "liquidity",
       direction: "remove",
-      amountLP: ethers.formatUnits(log.args.liquidity, 18),
+      amountLP: log.args.liquidity ? ethers.formatUnits(log.args.liquidity, 18) : "0.00",
       timestamp: ts,
       txHash: log.transactionHash,
     });
@@ -90,7 +90,7 @@ export async function getUserTransactions(pairAddress, userAddress) {
     const ts = await getBlockTimestamp(provider, log.blockNumber);
     txs.push({
       type: "reward",
-      amount: ethers.formatUnits(log.args.amount, 18),
+      amount: log.args.amount ? ethers.formatUnits(log.args.amount, 18) : "0.00",
       timestamp: ts,
       txHash: log.transactionHash,
     });

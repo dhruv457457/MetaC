@@ -21,9 +21,23 @@ export default function TransactionList({ userAddress, transactions = [], typeFi
           <li key={i} className="bg-gray-100 px-4 py-3 rounded-lg shadow-sm">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-sm text-gray-800">
-                  <strong>{tx.type.toUpperCase()}</strong>: {tx.amountA} {tx.tokenA}
-                  {tx.tokenB && ` → ${tx.amountB} ${tx.tokenB}`}
+                <p className="text-sm text-gray-800 font-medium">
+                  {(() => {
+                    if (tx.type === "swap") {
+                      return `SWAP: ${tx.inputAmount} ${tx.inputTokenSymbol} → ${tx.outputAmount} ${tx.outputTokenSymbol}`;
+                    }
+                    if (tx.type === "liquidity") {
+                      if (tx.direction === "add") {
+                        return `ADD LIQUIDITY: ${tx.amountA} + ${tx.amountB}`;
+                      } else {
+                        return `REMOVE LIQUIDITY: ${tx.amountLP}`;
+                      }
+                    }
+                    if (tx.type === "reward") {
+                      return `REWARD CLAIMED: ${tx.amount}`;
+                    }
+                    return "UNKNOWN TRANSACTION";
+                  })()}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {formatDistanceToNow(new Date(tx.timestamp * 1000))} ago

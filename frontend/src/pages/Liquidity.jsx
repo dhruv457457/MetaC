@@ -1,3 +1,4 @@
+// pages/Liquidity.jsx
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "../contexts/WalletContext";
@@ -5,8 +6,9 @@ import LiquidityHeader from "../components/liquidity/LiquidityHeader";
 import LiquidityForm from "../components/liquidity/LiquidityForm";
 import LiquiditySidebar from "../components/liquidity/LiquiditySidebar";
 import TransactionList from "../components/TransactionList";
-import { getPairAddress, getLPBalance } from "../utils/contractUtils";
+import { getPairAddress, getLPBalance, claimRewards } from "../utils/contractUtils";
 import { getUserTransactions } from "../utils/transactionLog";
+import { showSuccess, showError } from "../utils/toast";
 
 export default function Liquidity() {
   const { address, isConnected, signer } = useWallet();
@@ -42,11 +44,6 @@ export default function Liquidity() {
     fetchDetails();
   }, [tokenA, tokenB, address]);
 
-  const handleClaim = async () => {
-    // Passed into Sidebar to reuse existing claimRewards() logic
-    // Can be expanded if needed
-  };
-
   const refetchTransactionsAndLP = async () => {
     if (!pairAddress || !address) return;
     const lp = await getLPBalance(pairAddress, address);
@@ -57,6 +54,22 @@ export default function Liquidity() {
       setTransactions(txs);
     } catch (err) {
       console.warn("Failed to refresh transactions:", err);
+    }
+  };
+
+  const handleClaim = async () => {
+    if (!pairAddress) return;
+    try {
+      setLoading(true);
+      showSuccess("Claiming rewards...");
+      await claimRewards(pairAddress);
+      await refetchTransactionsAndLP();
+      showSuccess("Rewards successfully claimed!");
+    } catch (err) {
+      console.error("Claim failed:", err);
+      showError("Reward claim failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,26 +97,25 @@ export default function Liquidity() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-   <LiquidityForm
-  tokenA={tokenA}
-  setTokenA={setTokenA}
-  tokenB={tokenB}
-  setTokenB={setTokenB}
-  amountA={amountA}
-  setAmountA={setAmountA}
-  amountB={amountB}
-  setAmountB={setAmountB}
-  amountLP={amountLP}
-  setAmountLP={setAmountLP}
-  lpBalance={lpBalance}
-  pairAddress={pairAddress}
-  signer={signer}
-  address={address}
-  loading={loading}
-  setLoading={setLoading}
-  onTxUpdate={refetchTransactionsAndLP}
-/>
-
+          <LiquidityForm
+            tokenA={tokenA}
+            setTokenA={setTokenA}
+            tokenB={tokenB}
+            setTokenB={setTokenB}
+            amountA={amountA}
+            setAmountA={setAmountA}
+            amountB={amountB}
+            setAmountB={setAmountB}
+            amountLP={amountLP}
+            setAmountLP={setAmountLP}
+            lpBalance={lpBalance}
+            pairAddress={pairAddress}
+            signer={signer}
+            address={address}
+            loading={loading}
+            setLoading={setLoading}
+            onTxUpdate={refetchTransactionsAndLP}
+          />
         </div>
 
         <LiquiditySidebar

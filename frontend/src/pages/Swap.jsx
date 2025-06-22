@@ -1,3 +1,4 @@
+// pages/Swap.jsx
 import { useEffect, useState } from "react";
 import { useWallet } from "../contexts/WalletContext";
 import { showSuccess, showError, showWarning } from "../utils/toast";
@@ -6,7 +7,7 @@ import { getAllUserSwaps } from "../utils/transactionLog";
 
 import SwapForm from "../components/swap/SwapForm";
 import SwapChart from "../components/swap/SwapChart";
-import RecentTransactions from "../components/swap/RecentTransactions";
+import TransactionList from "../components/TransactionList";
 import { ethers } from "ethers";
 
 export default function Swap() {
@@ -17,14 +18,13 @@ export default function Swap() {
   const [amountIn, setAmountIn] = useState("");
   const [amountOut, setAmountOut] = useState("");
   const [pairAddress, setPairAddress] = useState(null);
-
+  const [transactions, setTransactions] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [priceHistory, setPriceHistory] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
 
-  // Estimate amountOut
   useEffect(() => {
     const fetchEstimate = async () => {
       if (tokenA && tokenB && amountIn) {
@@ -59,13 +59,12 @@ export default function Swap() {
     fetchEstimate();
   }, [tokenA, tokenB, amountIn]);
 
-  // Fetch recent txs & price history
   const fetchTransactions = async () => {
     setLoadingTransactions(true);
     try {
-      const allTxs = await getAllUserSwaps(null, 100); // all pairs, all users
+      const allTxs = await getAllUserSwaps(address, 100); // 🔁 CHANGED: passed address
+      setTransactions(allTxs.slice(0, 10)); // for TransactionList
 
-      // Filter relevant pair
       const filteredTxs = allTxs.filter(
         (tx) =>
           (tx.inputTokenSymbol === tokenA?.symbol &&
@@ -111,7 +110,7 @@ export default function Swap() {
       const parsedIn = ethers.parseUnits(amountIn, 18);
       await swap(pairAddress, parsedIn, tokenA.address);
       showSuccess("Swap successful!");
-      fetchTransactions(); // refresh chart and txs
+      fetchTransactions();
     } catch (err) {
       console.error("Swap failed:", err);
       showError("Swap failed.");
@@ -137,8 +136,6 @@ export default function Swap() {
 
   return (
     <div className="max-w-7xl mx-auto mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Swap Form */}
- 
       <SwapForm
         tokenA={tokenA}
         tokenB={tokenB}
@@ -152,7 +149,6 @@ export default function Swap() {
         loading={loading}
       />
 
-      {/* Chart */}
       <SwapChart
         tokenA={tokenA}
         tokenB={tokenB}
@@ -162,14 +158,11 @@ export default function Swap() {
         loading={loadingTransactions}
       />
 
-      {/* Transactions */}
-      <div className="lg:col-span-2">
-        <RecentTransactions
-          address={address}
-          transactions={recentTransactions}
-          onRefresh={fetchTransactions}
-          loading={loadingTransactions}
-        />
+      <div className="mt-10 bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          Recent Transactions
+        </h3>
+        <TransactionList userAddress={address} transactions={transactions} />
       </div>
     </div>
   );
