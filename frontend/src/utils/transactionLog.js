@@ -9,12 +9,7 @@ const tokenList = [
   { symbol: "MOO", address: "0x9ce3BF7A31512c143Aad88BC92E1899b2FD862Dc" },
 ];
 
-function getTokenSymbol(address) {
-  const token = tokenList.find(
-    (t) => t.address.toLowerCase() === address.toLowerCase()
-  );
-  return token ? token.symbol : address.slice(0, 6) + "..." + address.slice(-4);
-}
+
 
 async function getBlockTimestamp(provider, blockNumber) {
   const block = await provider.getBlock(blockNumber);
@@ -151,4 +146,10 @@ export async function saveSwapToBackend(swapData) {
   } catch (err) {
     console.error("❌ Failed to save swap:", err);
   }
+}
+export function getTokenSymbol(address) {
+  const token = tokenList.find(
+    (t) => t.address.toLowerCase() === address.toLowerCase()
+  );
+  return token ? token.symbol : address.slice(0, 6) + "..." + address.slice(-4);
 }

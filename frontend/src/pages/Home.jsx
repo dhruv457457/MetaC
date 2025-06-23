@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useWallet } from "../contexts/WalletContext";
 import metaCowLogo from "../assets/MetaCowLogo.png";
+import TrendingPairs from "../components/TrendingPairs";
 
 export default function Home() {
   const { isConnected } = useWallet();
@@ -86,7 +87,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+<TrendingPairs />
       {/* Features Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4">

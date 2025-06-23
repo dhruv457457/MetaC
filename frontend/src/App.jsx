@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import Swap from "./pages/Swap";
 import CreatePair from "./pages/CreatePair";
 import Liquidity from "./pages/Liquidity";
-
+import ProfilePage from "./pages/ProfilePage"; // Import ProfilePage if needed
 export default function App() {
   return (
     <WalletProvider>
@@ -19,6 +19,8 @@ export default function App() {
               <Route path="/swap" element={<Swap />} />
               <Route path="/liquidity" element={<Liquidity />} />
               <Route path="/create-pair" element={<CreatePair />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              {/* Add more routes as needed */}
             </Routes>
           </main>
           <Toaster />

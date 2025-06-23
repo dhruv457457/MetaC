@@ -49,13 +49,13 @@ export default function Navbar() {
     { path: "/swap", label: "Swap", icon: "🔄" },
     { path: "/liquidity", label: "Liquidity", icon: "💧" },
     { path: "/create-pair", label: "Create Pair", icon: "➕" },
+    { path: "/profile", label: "Profile", icon: "👤" },
   ];
 
   return (
     <nav className="bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo + Title */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative">
               <img
@@ -75,7 +75,6 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-2">
             {navItems.map((item) => (
               <Link
@@ -93,15 +92,12 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Wallet Section */}
           <div className="flex items-center gap-4">
-            {/* Network Status */}
             <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               BNB Smart Testnet
             </div>
 
-            {/* Wallet Button */}
             {isConnected ? (
               <div className="relative">
                 <button
@@ -166,6 +162,14 @@ export default function Navbar() {
                         </div>
                       </div>
 
+                      <Link
+                        to="/profile"
+                        className="block text-center w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-200 font-medium"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        View Profile
+                      </Link>
+
                       <button
                         onClick={handleDisconnect}
                         className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium"
@@ -198,7 +202,6 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         <div className="md:hidden mt-4 flex gap-2 overflow-x-auto pb-2">
           {navItems.map((item) => (
             <Link
