@@ -1,45 +1,16 @@
 const mongoose = require("mongoose");
 
 const SwapSchema = new mongoose.Schema({
-  user: {
-    type: String,
-    required: true,
-    lowercase: true,
-  },
-  pairAddress: {
-    type: String,
-    required: true,
-    lowercase: true,
-  },
-  inputToken: {
-    type: String,
-    required: true,
-  },
-  outputToken: {
-    type: String,
-    required: true,
-  },
-  inputAmount: {
-    type: String,
-    required: true,
-  },
-  outputAmount: {
-    type: String,
-    required: true,
-  },
-  txHash: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  blockNumber: {
-    type: Number,
-    required: true,
-  },
-  timestamp: {
-    type: Number,
-    required: true,
-  },
-}, { timestamps: true });
+  user: String,
+  pairAddress: String,
+  inputToken: String,
+  outputToken: String,
+  inputAmount: String,
+  outputAmount: String,
+  txHash: { type: String, unique: true },
+  blockNumber: Number,
+  timestamp: Number,
+  type: { type: String, default: "swap" }, // ✅ Add this field
+});
 
 module.exports = mongoose.model("Swap", SwapSchema);

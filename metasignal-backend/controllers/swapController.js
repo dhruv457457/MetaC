@@ -19,17 +19,18 @@ exports.createSwap = async (req, res) => {
     const exists = await Swap.findOne({ txHash });
     if (exists) return res.status(200).json({ message: "Already saved." });
 
-    const swap = new Swap({
-      user,
-      pairAddress,
-      inputToken,
-      outputToken,
-      inputAmount,
-      outputAmount,
-      txHash,
-      blockNumber,
-      timestamp,
-    });
+ const swap = new Swap({
+  user,
+  pairAddress,
+  inputToken,
+  outputToken,
+  inputAmount,
+  outputAmount,
+  txHash,
+  blockNumber,
+  timestamp,
+  type: "swap", // ✅ Add this field
+});
 
     await swap.save();
     res.status(201).json({ message: "Swap saved", swap });

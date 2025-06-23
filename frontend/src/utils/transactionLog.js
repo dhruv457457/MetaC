@@ -13,7 +13,7 @@ function getTokenSymbol(address) {
   const token = tokenList.find(
     (t) => t.address.toLowerCase() === address.toLowerCase()
   );
-  return token ? token.symbol : `${address.slice(0, 6)}...${address.slice(-4)}`;
+  return token ? token.symbol : address.slice(0, 6) + "..." + address.slice(-4);
 }
 
 async function getBlockTimestamp(provider, blockNumber) {
@@ -99,97 +99,56 @@ export async function getUserTransactions(pairAddress, userAddress) {
   return txs.sort((a, b) => b.timestamp - a.timestamp);
 }
 
-export async function getAllUserSwaps(userAddress, limit = 10) {
+export async function getAllUserSwaps(userAddress, limit = 100) {
+  if (!userAddress) return [];
+
   try {
-    const { factory, provider } = await getFactoryContractReadOnly();
-    const pairsLength = await factory.allPairsLength();
-    const latestBlock = await provider.getBlockNumber();
-    const startBlock = latestBlock - 10000;
-    const maxPairs = Math.min(Number(pairsLength), 50);
-    const allSwaps = [];
+    const res = await fetch(
+      `http://localhost:5000/api/swaps/recent?user=${userAddress}&limit=${limit}`
+    );
+    if (!res.ok) throw new Error("Backend fetch failed");
+    const data = await res.json();
 
-    for (let i = 0; i < maxPairs; i++) {
-      try {
-        const pairAddress = await factory.getPairAtIndex(i);
-        const { pair, provider: pairProvider } = await getPairContractReadOnly(pairAddress);
-
-        const swapLogs = await pair.queryFilter(
-          pair.filters.Swapped(userAddress),
-          startBlock,
-          latestBlock
-        );
-
-        for (const log of swapLogs) {
-          const ts = await getBlockTimestamp(pairProvider, log.blockNumber);
-          allSwaps.push({
-            type: "swap",
-            inputToken: log.args.inputToken,
-            outputToken: log.args.outputToken,
-            inputTokenSymbol: getTokenSymbol(log.args.inputToken),
-            outputTokenSymbol: getTokenSymbol(log.args.outputToken),
-            inputAmount: ethers.formatUnits(log.args.inputAmount, 18),
-            outputAmount: ethers.formatUnits(log.args.outputAmount, 18),
-            timestamp: ts,
-            txHash: log.transactionHash,
-            blockNumber: log.blockNumber,
-            pairAddress,
-          });
-        }
-      } catch (err) {
-        console.warn(`Failed to fetch swaps from pair ${i}:`, err);
-      }
-    }
-
-    return allSwaps.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
+    // Ensure correct formatting for chart & list
+    return data.map((tx) => ({
+      ...tx,
+      inputTokenSymbol: getTokenSymbol(tx.inputToken),
+      outputTokenSymbol: getTokenSymbol(tx.outputToken),
+    }));
   } catch (err) {
-    console.error("Failed to fetch user swaps:", err);
+    console.error("❌ Failed to fetch from backend:", err);
     return [];
   }
 }
 
 export async function getAllSwapsAcrossPairs(limit = 50) {
   try {
-    const { factory, provider } = await getFactoryContractReadOnly();
-    const pairsLength = await factory.allPairsLength();
-    const latestBlock = await provider.getBlockNumber();
-    const startBlock = latestBlock - 10000;
-    const maxPairs = Math.min(Number(pairsLength), 50);
-    const allSwaps = [];
+    const res = await fetch(`http://localhost:5000/api/swaps/recent?limit=${limit}`);
+    if (!res.ok) throw new Error("Backend fetch failed");
+    const data = await res.json();
 
-    for (let i = 0; i < maxPairs; i++) {
-      try {
-        const pairAddress = await factory.getPairAtIndex(i);
-        const { pair, provider: pairProvider } = await getPairContractReadOnly(pairAddress);
-
-        const swapLogs = await pair.queryFilter(
-          pair.filters.Swapped(),
-          startBlock,
-          latestBlock
-        );
-
-        for (const log of swapLogs) {
-          const ts = await getBlockTimestamp(pairProvider, log.blockNumber);
-          allSwaps.push({
-            inputToken: log.args.inputToken,
-            outputToken: log.args.outputToken,
-            inputTokenSymbol: getTokenSymbol(log.args.inputToken),
-            outputTokenSymbol: getTokenSymbol(log.args.outputToken),
-            inputAmount: ethers.formatUnits(log.args.inputAmount, 18),
-            outputAmount: ethers.formatUnits(log.args.outputAmount, 18),
-            timestamp: ts,
-            txHash: log.transactionHash,
-            blockNumber: log.blockNumber,
-            pairAddress,
-          });
-        }
-      } catch (err) {
-        console.warn(`Skipping pair ${i}:`, err);
-      }
-    }
-
-    return allSwaps.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
+    return data.map((tx) => ({
+      ...tx,
+      inputTokenSymbol: getTokenSymbol(tx.inputToken),
+      outputTokenSymbol: getTokenSymbol(tx.outputToken),
+    }));
   } catch (err) {
-    console.error("Failed to fetch all swaps:", err);
+    console.error("❌ Failed to fetch all swaps:", err);
     return [];
+  }
+}
+
+export async function saveSwapToBackend(swapData) {
+  try {
+    const res = await fetch("http://localhost:5000/api/swaps", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(swapData),
+    });
+
+    const json = await res.json();
+    return json;
+  } catch (err) {
+    console.error("❌ Failed to save swap:", err);
   }
 }
