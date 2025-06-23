@@ -1,4 +1,5 @@
 const Swap = require("../models/Swap");
+const User = require("../models/User"); // Make sure this is imported
 
 // POST /api/swaps
 exports.createSwap = async (req, res) => {
@@ -15,22 +16,34 @@ exports.createSwap = async (req, res) => {
       timestamp,
     } = req.body;
 
-    // Check if already exists to avoid duplicates
+    // ✅ Defensive check
+    if (!user || typeof user !== "string") {
+      return res.status(400).json({ error: "Missing or invalid wallet address in request body" });
+    }
+
+    // Fetch user profile (optional)
+    const userProfile = await User.findOne({ wallet: user.toLowerCase() });
+    const username = userProfile?.username || null;
+    const profileImage = userProfile?.profileImage || null;
+
+    // Avoid duplicate txs
     const exists = await Swap.findOne({ txHash });
     if (exists) return res.status(200).json({ message: "Already saved." });
 
- const swap = new Swap({
-  user,
-  pairAddress,
-  inputToken,
-  outputToken,
-  inputAmount,
-  outputAmount,
-  txHash,
-  blockNumber,
-  timestamp,
-  type: "swap", // ✅ Add this field
-});
+    const swap = new Swap({
+      user,
+      username,
+      profileImage,
+      pairAddress,
+      inputToken,
+      outputToken,
+      inputAmount,
+      outputAmount,
+      txHash,
+      blockNumber,
+      timestamp,
+      type: "swap",
+    });
 
     await swap.save();
     res.status(201).json({ message: "Swap saved", swap });
@@ -39,8 +52,7 @@ exports.createSwap = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-// GET /api/swaps/recent?user=0x123...&limit=10
+// GET /api/swaps/recent
 exports.getRecentSwaps = async (req, res) => {
   try {
     const { user, limit = 10 } = req.query;

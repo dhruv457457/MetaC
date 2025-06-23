@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 
 const SwapSchema = new mongoose.Schema({
   user: String,
+  username: String,
+profileImage: String,
   pairAddress: String,
   inputToken: String,
   outputToken: String,

@@ -6,12 +6,14 @@ const cors = require("cors");
 const swapRoutes = require("./routes/swapRoutes");
 const pairRoutes = require("./routes/pairRoutes");
 const alchemyRoutes = require("./routes/alchemyRoutes"); // ✅ ADD THIS
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // ✅ Routes
+app.use("/api/users", userRoutes);
 app.use("/api/swaps", swapRoutes);
 app.use("/api/pairs", pairRoutes);
 app.use("/api/alchemy", alchemyRoutes); // ✅ Mount the Alchemy route
