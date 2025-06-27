@@ -19,6 +19,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/swaps", swapRoutes);
 app.use("/api/pairs", pairRoutes);
 app.use("/api/alchemy", alchemyRoutes); // ✅ Mount the Alchemy route
+app.get("/ping", (req, res) => res.status(200).send("pong"));
 
 app.get("/", (req, res) => {
   res.send("✅ MetaCow backend is live");
@@ -28,8 +29,7 @@ const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+
   })
   .then(() => {
     console.log("✅ MongoDB connected");

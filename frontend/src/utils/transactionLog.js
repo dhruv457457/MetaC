@@ -9,8 +9,6 @@ const tokenList = [
   { symbol: "MOO", address: "0x9ce3BF7A31512c143Aad88BC92E1899b2FD862Dc" },
 ];
 
-
-
 async function getBlockTimestamp(provider, blockNumber) {
   const block = await provider.getBlock(blockNumber);
   return block.timestamp;
@@ -99,12 +97,11 @@ export async function getAllUserSwaps(userAddress, limit = 100) {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/api/swaps/recent?user=${userAddress}&limit=${limit}`
+      `https://metac.onrender.com/api/swaps/recent?user=${userAddress}&limit=${limit}`
     );
     if (!res.ok) throw new Error("Backend fetch failed");
     const data = await res.json();
 
-    // Ensure correct formatting for chart & list
     return data.map((tx) => ({
       ...tx,
       inputTokenSymbol: getTokenSymbol(tx.inputToken),
@@ -118,7 +115,7 @@ export async function getAllUserSwaps(userAddress, limit = 100) {
 
 export async function getAllSwapsAcrossPairs(limit = 50) {
   try {
-    const res = await fetch(`http://localhost:5000/api/swaps/recent?limit=${limit}`);
+    const res = await fetch(`https://metac.onrender.com/api/swaps/recent?limit=${limit}`);
     if (!res.ok) throw new Error("Backend fetch failed");
     const data = await res.json();
 
@@ -135,7 +132,7 @@ export async function getAllSwapsAcrossPairs(limit = 50) {
 
 export async function saveSwapToBackend(swapData) {
   try {
-    const res = await fetch("http://localhost:5000/api/swaps", {
+    const res = await fetch("https://metac.onrender.com/api/swaps", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(swapData),
@@ -147,6 +144,7 @@ export async function saveSwapToBackend(swapData) {
     console.error("❌ Failed to save swap:", err);
   }
 }
+
 export function getTokenSymbol(address) {
   const token = tokenList.find(
     (t) => t.address.toLowerCase() === address.toLowerCase()

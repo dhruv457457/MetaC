@@ -17,7 +17,7 @@ export default function ProfilePage() {
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/wallet/${walletAddress}`);
+        const res = await axios.get(`https://metac.onrender.com/api/users/wallet/${walletAddress}`);
         setUser(res.data);
       } catch (err) {
         if (err.response?.status === 404) {
