@@ -20,7 +20,7 @@ export default function RegisterProfile({ wallet, onRegister }) {
       setLoading(true);
       setError("");
 
-      const res = await axios.post("https://metac.onrender.com/api/users/register", {
+      const res = await axios.post("http://localhost:5000/api/users/register", {
         wallet: wallet.toLowerCase(),
         username: finalUsername,
       });

@@ -1,10 +1,9 @@
-import { getEthereumProvider } from "./metamaskClient";
 import { FACTORY_ADDRESS, FACTORY_ABI, PAIR_ABI } from "./constants";
 import { ethers } from "ethers";
 
 // ✅ Get signer and provider
 export async function getProviderAndSigner() {
-  const provider = new ethers.BrowserProvider(await getEthereumProvider());
+const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
   return { provider, signer };
 }

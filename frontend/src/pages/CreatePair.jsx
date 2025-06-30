@@ -5,8 +5,9 @@ import { createPair, getFactoryContract } from "../utils/contractUtils";
 import { ethers } from "ethers";
 
 export default function CreatePair() {
-  const { isConnected } = useWallet();
-  const [tokenA, setTokenA] = useState(null);
+const { walletData } = useWallet();
+const address = walletData?.address;
+const isConnected = !!address;  const [tokenA, setTokenA] = useState(null);
   const [tokenB, setTokenB] = useState(null);
   const [pairAddress, setPairAddress] = useState("");
   const [status, setStatus] = useState("");

@@ -1,166 +1,82 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import MetaMaskSDK from "@metamask/sdk";
 import { ethers } from "ethers";
-import { getEthereumProvider } from "../utils/metamaskClient";
 
 const WalletContext = createContext();
 
-export const useWallet = () => {
-  const context = useContext(WalletContext);
-  if (!context) {
-    throw new Error("useWallet must be used within a WalletProvider");
-  }
-  return context;
-};
+const MMSDK = new MetaMaskSDK({
+  dappMetadata: {
+    name: "MetaCow",
+    url: typeof window !== "undefined" ? window.location.origin : "",
+  },
+  checkInstallationImmediately: false,
+});
 
 export const WalletProvider = ({ children }) => {
-  const [address, setAddress] = useState(null);
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
+  const [walletData, setWalletData] = useState({
+    address: null,
+    signer: null,
+    provider: null,
+    chainId: null,
+    balance: "0",
+  });
   const [isConnecting, setIsConnecting] = useState(false);
-  const [chainId, setChainId] = useState(null);
-  const [balance, setBalance] = useState("0");
-
-  // Check if wallet is already connected on app load
-  useEffect(() => {
-    checkConnection();
-    setupEventListeners();
-  }, []);
-
-  // Update balance when address changes
-  useEffect(() => {
-    if (address && provider) {
-      updateBalance();
-    }
-  }, [address, provider]);
-
-  const checkConnection = async () => {
-    try {
-      const ethereumProvider = await getEthereumProvider();
-      if (!ethereumProvider) return;
-
-      const accounts = await ethereumProvider.request({
-        method: "eth_accounts",
-      });
-
-      if (accounts.length > 0) {
-        const ethersProvider = new ethers.BrowserProvider(ethereumProvider);
-        const ethersSigner = await ethersProvider.getSigner();
-        const network = await ethersProvider.getNetwork();
-
-        setProvider(ethersProvider);
-        setSigner(ethersSigner);
-        setAddress(accounts[0]);
-        setChainId(network.chainId.toString());
-      }
-    } catch (error) {
-      console.error("Error checking wallet connection:", error);
-    }
-  };
-
-  const setupEventListeners = async () => {
-    const ethereumProvider = await getEthereumProvider();
-    if (!ethereumProvider) return;
-
-    ethereumProvider.on("accountsChanged", (accounts) => {
-      if (accounts.length === 0) {
-        disconnect();
-      } else {
-        setAddress(accounts[0]);
-      }
-    });
-
-    ethereumProvider.on("chainChanged", (chainId) => {
-      setChainId(chainId);
-      window.location.reload(); // Reload to reset state
-    });
-
-    ethereumProvider.on("disconnect", () => {
-      disconnect();
-    });
-  };
 
   const connectWallet = async () => {
     try {
       setIsConnecting(true);
-      const ethereumProvider = await getEthereumProvider();
+      const ethereum = MMSDK.getProvider();
 
-      if (!ethereumProvider) {
-        throw new Error("MetaMask not found. Please install MetaMask.");
+      if (!ethereum) {
+        throw new Error("MetaMask not found");
       }
 
-      const accounts = await ethereumProvider.request({
-        method: "eth_requestAccounts",
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      const ethersProvider = new ethers.BrowserProvider(ethereum);
+      const signer = await ethersProvider.getSigner();
+      const network = await ethersProvider.getNetwork();
+      const balance = await ethersProvider.getBalance(accounts[0]);
+
+      setWalletData({
+        address: accounts[0],
+        signer,
+        provider: ethersProvider,
+        chainId: network.chainId.toString(),
+        balance: ethers.formatEther(balance),
       });
 
-      const ethersProvider = new ethers.BrowserProvider(ethereumProvider);
-      const ethersSigner = await ethersProvider.getSigner();
-      const network = await ethersProvider.getNetwork();
-
-      setProvider(ethersProvider);
-      setSigner(ethersSigner);
-      setAddress(accounts[0]);
-      setChainId(network.chainId.toString());
-
       return { success: true };
-    } catch (error) {
-      console.error("Wallet connection failed:", error);
-      return {
-        success: false,
-        error: error.message || "Failed to connect wallet",
-      };
+    } catch (err) {
+      console.error("connectWallet failed:", err);
+      return { success: false, error: err.message };
     } finally {
       setIsConnecting(false);
     }
   };
 
   const disconnect = () => {
-    setAddress(null);
-    setProvider(null);
-    setSigner(null);
-    setChainId(null);
-    setBalance("0");
-  };
-
-  const updateBalance = async () => {
-    try {
-      if (provider && address) {
-        const balanceWei = await provider.getBalance(address);
-        const balanceEth = ethers.formatEther(balanceWei);
-        setBalance(parseFloat(balanceEth).toFixed(4));
-      }
-    } catch (error) {
-      console.error("Error updating balance:", error);
-    }
-  };
-
-  const switchNetwork = async (targetChainId) => {
-    try {
-      const ethereumProvider = await getEthereumProvider();
-      await ethereumProvider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: `0x${targetChainId.toString(16)}` }],
-      });
-    } catch (error) {
-      console.error("Error switching network:", error);
-      throw error;
-    }
-  };
-
-  const value = {
-    address,
-    provider,
-    signer,
-    isConnected: !!address,
-    isConnecting,
-    chainId,
-    balance,
-    connectWallet,
-    disconnect,
-    updateBalance,
-    switchNetwork,
+    setWalletData({
+      address: null,
+      signer: null,
+      provider: null,
+      chainId: null,
+      balance: "0",
+    });
   };
 
   return (
-    <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
+    <WalletContext.Provider
+      value={{
+        walletData,
+        setWalletData,
+        connectWallet,
+        disconnect,
+        isConnecting,
+      }}
+    >
+      {children}
+    </WalletContext.Provider>
   );
 };
+
+export const useWallet = () => useContext(WalletContext);

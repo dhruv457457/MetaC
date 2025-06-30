@@ -7,16 +7,19 @@ import logo from "../assets/MetaCowLogo.png";
 
 export default function Navbar() {
   const {
-    address,
-    isConnected,
-    isConnecting,
-    balance,
+    walletData,
+    setWalletData,
     connectWallet,
-    disconnect,
+    disconnect,  
+    isConnecting,
   } = useWallet();
+
+  const address = walletData?.address;
+  const isConnected = !!address;
+  const balance = walletData?.balance || "0";
+  const location = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
   const [lpBalance, setLpBalance] = useState("0.0");
-  const location = useLocation();
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -33,14 +36,16 @@ export default function Navbar() {
   }, [address]);
 
   const handleConnect = async () => {
+    if (isConnecting) return;
+
     const result = await connectWallet();
     if (!result.success) {
-      showError(result.error);
+      showError(result.error || "Wallet connection failed.");
     }
   };
 
   const handleDisconnect = () => {
-    disconnect();
+      disconnect();
     setShowDropdown(false);
   };
 
@@ -95,8 +100,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              BNB Smart Testnet
-            </div>
+Sepolia Testnet            </div>
 
             {isConnected ? (
               <div className="relative">

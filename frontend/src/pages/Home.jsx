@@ -4,8 +4,9 @@ import metaCowLogo from "../assets/MetaCowLogo.png";
 import TrendingPairs from "../components/TrendingPairs";
 
 export default function Home() {
-  const { isConnected } = useWallet();
-
+const { walletData } = useWallet();
+const address = walletData?.address;
+const isConnected = !!address;
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -223,7 +224,7 @@ export default function Home() {
           </p>
           <div className="flex justify-center gap-6 text-sm text-gray-500">
             <span>🌐 Ethereum Network</span>
-            <span>⚡ Powered by Monad</span>
+            <span>⚡ Powered by MetaMask Sdk</span>
             <span>🔒 Audited & Secure</span>
           </div>
         </div>

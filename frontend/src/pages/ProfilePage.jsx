@@ -7,17 +7,19 @@ import RecentActivity from "../components/profile/RecentActivity";
 import RegisterProfile from "../components/profile/RegisterProfile";
 
 export default function ProfilePage() {
-  const { address: walletAddress, isConnected } = useWallet();
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+const { walletData } = useWallet();
+const address = walletData?.address;
+const isConnected = !!address;
 
-  useEffect(() => {
-    if (!walletAddress) return;
+ useEffect(() => {
+    if (!address) return;
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`https://metac.onrender.com/api/users/wallet/${walletAddress}`);
+        const res = await axios.get(`http://localhost:5000/api/users/wallet/${address}`);
         setUser(res.data);
       } catch (err) {
         if (err.response?.status === 404) {
@@ -31,8 +33,7 @@ export default function ProfilePage() {
     };
 
     fetchUser();
-  }, [walletAddress]);
-
+  }, [address]);
   console.log("🧠 Render state - user:", user, "loading:", loading);
 
   if (!isConnected) {
@@ -52,7 +53,7 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return <RegisterProfile wallet={walletAddress} onRegister={setUser} />;
+    return <RegisterProfile wallet={address} onRegister={setUser} />;
   }
 
   if (!user.username) {
@@ -84,7 +85,7 @@ export default function ProfilePage() {
       )}
 
       {/* Recent Transactions / Activity */}
-      <RecentActivity wallet={walletAddress} />
+      <RecentActivity wallet={address} />
     </div>
   );
 }

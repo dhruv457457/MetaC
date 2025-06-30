@@ -11,7 +11,11 @@ import { getUserTransactions } from "../utils/transactionLog";
 import { showSuccess, showError } from "../utils/toast";
 
 export default function Liquidity() {
-  const { address, isConnected, signer } = useWallet();
+  const { walletData } = useWallet();
+const address = walletData?.address;
+const signer = walletData?.signer;
+const isConnected = !!address;
+
 
   const [tokenA, setTokenA] = useState(null);
   const [tokenB, setTokenB] = useState(null);

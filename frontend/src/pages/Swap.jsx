@@ -11,7 +11,6 @@ import TransactionList from "../components/TransactionList";
 import { ethers } from "ethers";
 
 export default function Swap() {
-  const { address, isConnected } = useWallet();
 
   const [tokenA, setTokenA] = useState(null);
   const [tokenB, setTokenB] = useState(null);
@@ -21,7 +20,9 @@ export default function Swap() {
   const [transactions, setTransactions] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [priceHistory, setPriceHistory] = useState([]);
-
+const { walletData } = useWallet();
+const address = walletData?.address;
+const isConnected = !!address;
   const [loading, setLoading] = useState(false);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
 

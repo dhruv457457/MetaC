@@ -8,7 +8,6 @@ const pairRoutes = require("./routes/pairRoutes");
 const alchemyRoutes = require("./routes/alchemyRoutes"); // ✅ ADD THIS
 const userRoutes = require("./routes/userRoutes");
 const statsRoutes = require("./routes/statsRoutes");
-
 const app = express();
 app.use(cors());
 app.use(express.json());

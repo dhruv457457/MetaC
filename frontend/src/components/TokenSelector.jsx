@@ -2,10 +2,10 @@ import { useState } from "react";
 
 // ✅ Update this list with your actual token data
 const tokenList = [
-  { symbol: "TKA", address: "0x8b0C1326D16eC18B7af6F75A352Cb0fFe8862e44" },
-  { symbol: "TKB", address: "0xae9e16b1fa7FA2962Ade8758c171E619f780f516" },
-  { symbol: "USDT", address: "0xC832785d6b0207708c4b7D1f1c2cF7809268d7e3" },
-  { symbol: "MOO", address: "0x9ce3BF7A31512c143Aad88BC92E1899b2FD862Dc" },
+  { symbol: "TKA", address: "0x1e792D4c34c3d04Bd127aFEf0c1696E912c755aa" },
+  { symbol: "TKB", address: "0x9e53abdDBFa9DC6A9bCD9D0e5DD7144F2701718D" },
+  { symbol: "USDT", address: "0xD9b7b6a9146291f87ea383E47Bf7FEc6b707e699" },
+  { symbol: "MOO", address: "0xA18938653750B70DCBbC0DF5a03D9F2e5958D8E8" },
 ];
 
 export default function TokenSelector({ selected, onSelect }) {

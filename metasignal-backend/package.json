@@ -10,6 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@circle-fin/circle-sdk": "^1.0.2",
+    "@circle-fin/developer-controlled-wallets": "^8.3.0",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
