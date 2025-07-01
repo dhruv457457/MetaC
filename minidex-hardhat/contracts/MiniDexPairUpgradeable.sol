@@ -178,11 +178,14 @@ contract MiniDexPairUpgradeable is Initializable, UUPSUpgradeable, OwnableUpgrad
         return (reserveA, reserveB);
     }
 
-    function getClaimableRewards(address user) external view returns (uint256) {
-        uint256 userShare = (LPbalances[user] * totalRewardPool) / totalLPSupply;
-        uint256 debt = userRewardDebt[user];
-        return claimableRewards[user] + (userShare > debt ? userShare - debt : 0);
-    }
+function getClaimableRewards(address user) external view returns (uint256) {
+    if (totalLPSupply == 0) return 0;
+
+    uint256 userShare = (LPbalances[user] * totalRewardPool) / totalLPSupply;
+    uint256 debt = userRewardDebt[user];
+    return claimableRewards[user] + (userShare > debt ? userShare - debt : 0);
+}
+
 
     function getTVL() external view returns (uint256) {
         return reserveA + reserveB;
@@ -198,4 +201,36 @@ contract MiniDexPairUpgradeable is Initializable, UUPSUpgradeable, OwnableUpgrad
         uint256 tvl = reserveA + reserveB;
         return (yearlyFees * 10000) / tvl; // APR in basis points (1250 = 12.5%)
     }
+function claimAndReinvest(uint256 amountB) external nonReentrant {
+    _updateRewards(msg.sender);
+
+    uint256 reward = claimableRewards[msg.sender];
+    require(reward > 0, "No rewards");
+    claimableRewards[msg.sender] = 0;
+
+    IERC20(tokenB).transferFrom(msg.sender, address(this), amountB); // User provides tokenB only
+
+    uint256 lpToMint;
+
+    if (totalLPSupply == 0 || reserveA == 0 || reserveB == 0) {
+        lpToMint = sqrt(reward * amountB);
+    } else {
+        lpToMint = min(
+            (reward * totalLPSupply) / reserveA,
+            (amountB * totalLPSupply) / reserveB
+        );
+    }
+
+    require(lpToMint > 0, "Zero LP minted");
+
+    LPbalances[msg.sender] += lpToMint;
+    totalLPSupply += lpToMint;
+
+    _updateReserve();
+
+    emit RewardClaimed(msg.sender, reward);
+    emit LiquidityAdded(msg.sender, reward, amountB, lpToMint);
+}
+
+
 }

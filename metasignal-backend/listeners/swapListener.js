@@ -2,8 +2,9 @@ import { ethers } from "ethers";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
-import Feed from "../models/Pair.js";
+import Feed from "../models/Feed.js";
 import User from "../models/User.js";
+import Follow from "../models/Follow.js";
 
 dotenv.config();
 
@@ -12,8 +13,6 @@ const RPC_URL = process.env.RPC_URL;
 const FACTORY_ADDRESS = process.env.FACTORY_ADDRESS;
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
-
-// Load ABIs using fs
 const pairAbi = JSON.parse(fs.readFileSync(path.join(__dirname, "src/listeners/Pair.json"), "utf8"));
 const factoryAbi = JSON.parse(fs.readFileSync(path.join(__dirname, "src/listeners/Factory.json"), "utf8"));
 
@@ -23,7 +22,6 @@ const pairContracts = [];
 export async function startSwapListener() {
   const factory = new ethers.Contract(FACTORY_ADDRESS, factoryAbi.abi, provider);
   const pairCount = await factory.allPairsLength();
-
   console.log(`🔍 Found ${pairCount} pairs. Starting staggered polling...`);
 
   for (let i = 0; i < pairCount; i++) {
@@ -50,14 +48,12 @@ export async function startSwapListener() {
 
     while (start <= toBlock) {
       const end = Math.min(start + 99, toBlock);
-
       try {
         const chunkLogs = await contract.queryFilter("Swapped", start, end);
         allLogs.push(...chunkLogs);
       } catch (err) {
         console.error(`❌ Error polling ${address} from ${start} to ${end}: ${err.message}`);
       }
-
       start = end + 1;
     }
 
@@ -65,21 +61,37 @@ export async function startSwapListener() {
       const { user, inputToken, outputToken, inputAmount, outputAmount } = log.args;
       const lowerUser = user.toLowerCase();
 
-      const followers = await User.find({ follows: lowerUser });
+      // 1️⃣ Find user profile
+      const userProfile = await User.findOne({ wallet: lowerUser });
+      if (!userProfile) {
+        console.log(`⚠️ No user found for ${lowerUser}`);
+        continue;
+      }
 
-      for (const follower of followers) {
+      // 2️⃣ Find followers
+      const followedBy = await Follow.find({ following: userProfile._id }).populate("follower");
+
+      if (followedBy.length === 0) {
+        console.log(`ℹ️ ${lowerUser} has no followers. Skipping feed insert.`);
+        continue;
+      }
+
+      // 3️⃣ Update each follower’s feed
+      for (const follow of followedBy) {
+        const followerWallet = follow.follower.wallet.toLowerCase();
+
         await Feed.updateOne(
-          { owner: follower.address },
+          { owner: followerWallet },
           {
             $push: {
               events: {
-                type: "swap",
+                type: "copyTrade",
                 actor: lowerUser,
                 tokenIn: inputToken,
                 tokenOut: outputToken,
                 amountIn: inputAmount.toString(),
                 amountOut: outputAmount.toString(),
-                timestamp: Date.now() / 1000,
+                timestamp: Math.floor(Date.now() / 1000),
                 txHash: log.transactionHash,
               },
             },
@@ -88,10 +100,10 @@ export async function startSwapListener() {
         );
       }
 
-      console.log(`📡 Detected swap by ${user}, updated ${followers.length} feeds`);
+      console.log(`📡 Swap by ${lowerUser} → Updated feeds for ${followedBy.length} followers.`);
     }
 
     lastBlockSeen[address] = toBlock;
     currentIndex = (currentIndex + 1) % pairContracts.length;
-  }, 5000); // Poll one pair every 5 seconds
+  }, 5000);
 }

@@ -62,3 +62,13 @@ exports.getUserByWallet = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.searchUsers = async (req, res) => {
+  const { query } = req.query;
+  if (!query) return res.json([]);
+
+  const users = await User.find({
+    username: { $regex: query, $options: "i" },
+  }).select("username profileImage bio _id wallet");
+
+  res.json(users);
+};

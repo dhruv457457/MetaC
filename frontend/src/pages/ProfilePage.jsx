@@ -1,40 +1,36 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useWallet } from "../contexts/WalletContext";
+
 import ProfileHeader from "../components/profile/ProfileHeader";
 import ProfileEdit from "../components/profile/ProfileEdit";
 import RecentActivity from "../components/profile/RecentActivity";
+import SocialFeed from "../components/profile/SocialFeed";
 import RegisterProfile from "../components/profile/RegisterProfile";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
-const { walletData } = useWallet();
-const address = walletData?.address;
-const isConnected = !!address;
 
- useEffect(() => {
-    if (!address) return;
+  const { walletData } = useWallet();
+  const address = walletData?.address;
+  const isConnected = !!address;
 
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/users/wallet/${address}`);
         setUser(res.data);
       } catch (err) {
-        if (err.response?.status === 404) {
-          setUser(null); // ✅ Not registered
-        } else {
-          console.error("❌ Fetch user failed:", err);
-        }
+        console.error("User fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    if (isConnected) fetchUser();
   }, [address]);
-  console.log("🧠 Render state - user:", user, "loading:", loading);
 
   if (!isConnected) {
     return (
@@ -69,10 +65,8 @@ const isConnected = !!address;
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
-      {/* Profile Header with Avatar, Name, Edit button */}
       <ProfileHeader user={user} onEdit={() => setEditing(true)} />
 
-      {/* Profile Edit Section */}
       {editing && (
         <ProfileEdit
           user={user}
@@ -84,8 +78,8 @@ const isConnected = !!address;
         />
       )}
 
-      {/* Recent Transactions / Activity */}
       <RecentActivity wallet={address} />
+      <SocialFeed wallet={address} />
     </div>
   );
 }

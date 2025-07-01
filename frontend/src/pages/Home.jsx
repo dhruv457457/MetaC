@@ -1,12 +1,30 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import { useWallet } from "../contexts/WalletContext";
 import metaCowLogo from "../assets/MetaCowLogo.png";
-import TrendingPairs from "../components/TrendingPairs";
+import SearchFollow from "../components/SearchFollow";
 
 export default function Home() {
-const { walletData } = useWallet();
-const address = walletData?.address;
-const isConnected = !!address;
+  const { walletData } = useWallet();
+  const address = walletData?.address;
+  const isConnected = !!address;
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!address) return;
+      try {
+        const res = await axios.get(`http://localhost:5000/api/users/wallet/${address}`);
+        setUserId(res.data._id);
+      } catch (err) {
+        console.error("Failed to fetch user ID", err);
+      }
+    };
+
+    fetchUser();
+  }, [address]);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -88,8 +106,12 @@ const isConnected = !!address;
           </div>
         </div>
       </section>
-<TrendingPairs />
-      {/* Features Section */}
+
+      {/* Search and Follow Section */}
+{isConnected && userId && <SearchFollow currentUserId={userId} />}
+
+      {/* ... keep rest of the features, CTA and footer as you had them */}
+]      {/* Features Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">

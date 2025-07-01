@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol"; // ✅ Add this
 
 interface IMiniDexPair {
     function initialize(address tokenA, address tokenB, address owner) external;
 }
 
-contract MiniDexFactoryUpgradeable is Initializable, OwnableUpgradeable {
+contract MiniDexFactoryUpgradeable is Initializable, OwnableUpgradeable, UUPSUpgradeable { // ✅ Extend here
+
     event PairCreated(address indexed tokenA, address indexed tokenB, address pairAddress, uint256 index);
 
     address public pairImplementation;
@@ -18,8 +20,11 @@ contract MiniDexFactoryUpgradeable is Initializable, OwnableUpgradeable {
 
     function initialize(address _pairImplementation, address _owner) public initializer {
         __Ownable_init(_owner);
+        __UUPSUpgradeable_init(); // ✅ Add this too
         pairImplementation = _pairImplementation;
     }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {} // ✅ Required for UUPS
 
     function createPair(address tokenA, address tokenB) external onlyOwner returns (address pair) {
         require(tokenA != tokenB, "Identical addresses");
@@ -29,8 +34,8 @@ contract MiniDexFactoryUpgradeable is Initializable, OwnableUpgradeable {
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
 
         bytes memory data = abi.encodeWithSelector(IMiniDexPair.initialize.selector, token0, token1, msg.sender);
-        ERC1967Proxy proxy = new ERC1967Proxy(pairImplementation, data);
-        pair = address(proxy);
+        address proxy = address(new ERC1967Proxy(pairImplementation, data));
+        pair = proxy;
 
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair;
@@ -52,4 +57,7 @@ contract MiniDexFactoryUpgradeable is Initializable, OwnableUpgradeable {
         require(newImpl != address(0), "Zero address");
         pairImplementation = newImpl;
     }
+function version() external pure returns (string memory) {
+    return "v2";
+}
 }
