@@ -1,30 +1,38 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol"; // ✅ Add this
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 interface IMiniDexPair {
     function initialize(address tokenA, address tokenB, address owner) external;
 }
 
-contract MiniDexFactoryUpgradeable is Initializable, OwnableUpgradeable, UUPSUpgradeable { // ✅ Extend here
-
+contract MiniDexFactoryUpgradeable is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     event PairCreated(address indexed tokenA, address indexed tokenB, address pairAddress, uint256 index);
+    event ReputationUpdated(address indexed user, uint256 newScore);
 
     address public pairImplementation;
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
 
+    mapping(address => uint256) public reputationScores;
+    mapping(address => bool) public isTrustedUpdater;
+
+    modifier onlyTrusted() {
+        require(isTrustedUpdater[msg.sender], "Not authorized");
+        _;
+    }
+
     function initialize(address _pairImplementation, address _owner) public initializer {
         __Ownable_init(_owner);
-        __UUPSUpgradeable_init(); // ✅ Add this too
+        __UUPSUpgradeable_init();
         pairImplementation = _pairImplementation;
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {} // ✅ Required for UUPS
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function createPair(address tokenA, address tokenB) external onlyOwner returns (address pair) {
         require(tokenA != tokenB, "Identical addresses");
@@ -53,11 +61,18 @@ contract MiniDexFactoryUpgradeable is Initializable, OwnableUpgradeable, UUPSUpg
         return allPairs[index];
     }
 
-    function setPairImplementation(address newImpl) external onlyOwner {
-        require(newImpl != address(0), "Zero address");
-        pairImplementation = newImpl;
+    /// @notice Set trusted reputation updaters (backend or bot)
+    function setTrustedUpdater(address updater, bool status) external onlyOwner {
+        isTrustedUpdater[updater] = status;
     }
-function version() external pure returns (string memory) {
-    return "v2";
-}
+
+    /// @notice Update on-chain reputation score
+    function updateReputation(address user, uint256 score) external onlyTrusted {
+        reputationScores[user] = score;
+        emit ReputationUpdated(user, score);
+    }
+
+    function version() external pure returns (string memory) {
+        return "v2";
+    }
 }

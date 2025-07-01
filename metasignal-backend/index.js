@@ -15,6 +15,7 @@ const userRoutes = require("./routes/userRoutes");
 const statsRoutes = require("./routes/statsRoutes");
 const feedRoutes = require("./routes/feedRoutes");
 const followRoutes = require("./routes/followRoutes"); // ✅ NEW
+const reputationRoutes = require('./routes/reputationRoutes');
 
 // ✅ Route usage
 app.use("/api/users", userRoutes);
@@ -24,6 +25,7 @@ app.use("/api/alchemy", alchemyRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/feed", feedRoutes);
 app.use("/api", followRoutes); // ✅ Mount all follow-related routes here
+app.use('/api/reputation', reputationRoutes);
 
 // Health check
 app.get("/ping", (req, res) => res.status(200).send("pong"));
