@@ -25,6 +25,8 @@ contract MiniDexPairUpgradeable is Initializable, UUPSUpgradeable, OwnableUpgrad
     uint256 public totalRewardPool;
     uint256 public lastVolumeTimestamp;
     uint256 public volume24h;
+mapping(address => uint256) public totalInput;
+mapping(address => uint256) public totalOutput;
 
     event Swapped(address indexed user, address indexed inputToken, address indexed outputToken, uint256 inputAmount, uint256 outputAmount);
     event LiquidityAdded(address indexed provider, uint256 amountA, uint256 amountB, uint256 lpMinted);
@@ -101,6 +103,8 @@ contract MiniDexPairUpgradeable is Initializable, UUPSUpgradeable, OwnableUpgrad
         totalRewardPool += fee;
 
         IERC20(outputToken).transfer(msg.sender, outputAmount);
+totalInput[msg.sender] += inputAmount;
+totalOutput[msg.sender] += outputAmount;
 
         _updateReserve();
         _updateVolume(inputAmount);
@@ -231,6 +235,29 @@ function claimAndReinvest(uint256 amountB) external nonReentrant {
     emit RewardClaimed(msg.sender, reward);
     emit LiquidityAdded(msg.sender, reward, amountB, lpToMint);
 }
+function getReputationScore(address user) external view returns (uint256) {
+    uint256 lpShare = LPbalances[user];
+    uint256 rewards = claimableRewards[user];
+
+    uint256 lpWeight = totalLPSupply == 0 ? 0 : (lpShare * 1e18) / totalLPSupply;
+
+    uint256 score = (lpWeight / 1e14) // 10,000 max
+                  + (rewards / 1e16); // 1 point = 0.01 token
+
+    if (totalOutput[user] > totalInput[user]) {
+        score += (totalOutput[user] - totalInput[user]) / 1e16;
+    } else {
+        uint256 diff = (totalInput[user] - totalOutput[user]) / 1e16;
+        if (diff > score) {
+            score = 0;
+        } else {
+            score -= diff;
+        }
+    }
+
+    return score;
+}
+
 
 
 }

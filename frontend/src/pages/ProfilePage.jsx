@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ethers } from "ethers";
 import axios from "axios";
 import { useWallet } from "../contexts/WalletContext";
 
@@ -7,6 +8,9 @@ import ProfileEdit from "../components/profile/ProfileEdit";
 import RecentActivity from "../components/profile/RecentActivity";
 import SocialFeed from "../components/profile/SocialFeed";
 import RegisterProfile from "../components/profile/RegisterProfile";
+
+import { FACTORY_ADDRESS, FACTORY_ABI, PAIR_ABI } from "../utils/constants";
+import { Interface } from "ethers"; // needed for ABI fragment detection
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -36,10 +40,38 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchReputation = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/reputation/${address}`);
-        setReputation(res.data.score);
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const factory = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, provider);
+        const iface = new Interface(PAIR_ABI);
+
+        const pairCount = await factory.allPairsLength();
+        let totalScore = 0;
+
+        for (let i = 0; i < pairCount; i++) {
+          const pairAddr = await factory.allPairs(i);
+          const pair = new ethers.Contract(pairAddr, PAIR_ABI, provider);
+
+          // 👇 Check if function exists in ABI
+          const supportsReputation = iface.fragments.some(
+            (f) => f.name === "getReputationScore"
+          );
+
+          if (!supportsReputation) {
+            console.warn(`⚠️ Skipping pair ${pairAddr}, no getReputationScore`);
+            continue;
+          }
+
+          try {
+            const score = await pair.getReputationScore(address);
+            totalScore += Number(score);
+          } catch (err) {
+            console.warn(`Failed to fetch reputation from ${pairAddr}:`, err.message);
+          }
+        }
+
+        setReputation(totalScore);
       } catch (err) {
-        console.error("Reputation fetch error:", err);
+        console.error("On-chain reputation fetch error:", err);
       }
     };
 

@@ -1,16 +1,17 @@
+// scripts/upgradePair.js
 const { ethers, upgrades } = require("hardhat");
 
 async function main() {
-  const proxyAddress = "0x258b0F112b1d476542bC61f133C93C2aF0057E5A"; // your factory proxy
+  const proxyAddress = "0xa3804B7c2707eD42602b927EeB4697Eda8aA3F17"; // your PAIR proxy
 
-  console.log("Upgrading MiniDexPairUpgradeable...");
+  console.log("⏫ Upgrading MiniDexPairUpgradeable...");
 
-  const Factory = await ethers.getContractFactory("MiniDexFactoryUpgradeable");
-  const upgraded = await upgrades.upgradeProxy(proxyAddress, Factory, {
+  const Pair = await ethers.getContractFactory("MiniDexPairUpgradeable");
+  const upgraded = await upgrades.upgradeProxy(proxyAddress, Pair, {
     kind: "uups",
   });
 
-  console.log("✅ Upgrade complete! Proxy still at:", await upgraded.getAddress());
+  console.log("✅ Pair upgrade complete! Proxy still at:", await upgraded.getAddress());
 }
 
 main().catch((err) => {
