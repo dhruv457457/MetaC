@@ -11,7 +11,7 @@ export default function ProfileEdit({ user, onClose, onSave }) {
   const handleSave = async () => {
     try {
       setLoading(true);
-      const res = await axios.put(`http://localhost:5000/api/users/${user._id}/profile`, {
+      const res = await axios.put(`https://metac-1.onrender.com/api/users/${user._id}/profile`, {
         username,
         bio,
         profileImage,
@@ -34,7 +34,7 @@ export default function ProfileEdit({ user, onClose, onSave }) {
 
     try {
       setUploading(true);
-      const res = await axios.post("http://localhost:5000/api/users/upload-avatar", formData, {
+      const res = await axios.post("https://metac-1.onrender.com/api/users/upload-avatar", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setProfileImage(res.data.url);

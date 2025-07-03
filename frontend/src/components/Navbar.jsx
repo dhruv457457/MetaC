@@ -10,7 +10,7 @@ export default function Navbar() {
     walletData,
     setWalletData,
     connectWallet,
-    disconnect,  
+    disconnect,
     isConnecting,
   } = useWallet();
 
@@ -45,7 +45,7 @@ export default function Navbar() {
   };
 
   const handleDisconnect = () => {
-      disconnect();
+    disconnect();
     setShowDropdown(false);
   };
 
@@ -53,7 +53,7 @@ export default function Navbar() {
     { path: "/", label: "Home", icon: "🏠" },
     { path: "/swap", label: "Swap", icon: "🔄" },
     { path: "/liquidity", label: "Liquidity", icon: "💧" },
-    { path: "/create-pair", label: "Create Pair", icon: "➕" },
+    { path: "/faucet", label: "Faucet", icon: "🪙" },
     { path: "/profile", label: "Profile", icon: "👤" },
   ];
 
@@ -100,7 +100,8 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-Sepolia Testnet            </div>
+              Sepolia Testnet
+            </div>
 
             {isConnected ? (
               <div className="relative">

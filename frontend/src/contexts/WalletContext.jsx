@@ -26,10 +26,7 @@ export const WalletProvider = ({ children }) => {
     try {
       setIsConnecting(true);
       const ethereum = MMSDK.getProvider();
-
-      if (!ethereum) {
-        throw new Error("MetaMask not found");
-      }
+      if (!ethereum) throw new Error("MetaMask not found");
 
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
       const ethersProvider = new ethers.BrowserProvider(ethereum);
@@ -63,6 +60,33 @@ export const WalletProvider = ({ children }) => {
       balance: "0",
     });
   };
+
+  useEffect(() => {
+    const tryReconnect = async () => {
+      try {
+        const ethereum = MMSDK.getProvider();
+        const accounts = await ethereum.request({ method: "eth_accounts" });
+        if (accounts.length > 0) {
+          const ethersProvider = new ethers.BrowserProvider(ethereum);
+          const signer = await ethersProvider.getSigner();
+          const network = await ethersProvider.getNetwork();
+          const balance = await ethersProvider.getBalance(accounts[0]);
+
+          setWalletData({
+            address: accounts[0],
+            signer,
+            provider: ethersProvider,
+            chainId: network.chainId.toString(),
+            balance: ethers.formatEther(balance),
+          });
+        }
+      } catch (err) {
+        console.error("Auto reconnect failed:", err);
+      }
+    };
+
+    tryReconnect();
+  }, []);
 
   return (
     <WalletContext.Provider

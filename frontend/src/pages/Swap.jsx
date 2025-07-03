@@ -17,9 +17,21 @@ import SwapChart from "../components/swap/SwapChart";
 import TransactionList from "../components/TransactionList";
 import { ethers } from "ethers";
 
+// ✅ Default tokens (TKA & TKB)
+const DEFAULT_TOKENS = {
+  TKA: {
+    symbol: "TKA",
+    address: "0x1e792D4c34c3d04Bd127aFEf0c1696E912c755aa",
+  },
+  TKB: {
+    symbol: "TKB",
+    address: "0x9e53abdDBFa9DC6A9bCD9D0e5DD7144F2701718D",
+  },
+};
+
 export default function Swap() {
-  const [tokenA, setTokenA] = useState(null);
-  const [tokenB, setTokenB] = useState(null);
+  const [tokenA, setTokenA] = useState(DEFAULT_TOKENS.TKA);
+  const [tokenB, setTokenB] = useState(DEFAULT_TOKENS.TKB);
   const [amountIn, setAmountIn] = useState("");
   const [amountOut, setAmountOut] = useState("");
   const [pairAddress, setPairAddress] = useState(null);
@@ -35,12 +47,12 @@ export default function Swap() {
 
   useEffect(() => {
     if (location.state) {
-      const { tokenA, tokenB, amountIn } = location.state;
-      if (tokenA && tokenB) {
-        setTokenA({ address: tokenA });
-        setTokenB({ address: tokenB });
-        setAmountIn(amountIn);
+      const { tokenA: tokenAAddr, tokenB: tokenBAddr, amountIn } = location.state;
+      if (tokenAAddr && tokenBAddr) {
+        setTokenA({ address: tokenAAddr, symbol: "TKA" });
+        setTokenB({ address: tokenBAddr, symbol: "TKB" });
       }
+      if (amountIn) setAmountIn(amountIn);
     }
   }, [location.state]);
 
@@ -170,8 +182,10 @@ export default function Swap() {
     );
   }
 
-  return (
-    <div className="max-w-7xl mx-auto mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+return (
+  <div className="max-w-7xl mx-auto mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+    {/* Left - Swap Form */}
+    <div>
       <SwapForm
         tokenA={tokenA}
         tokenB={tokenB}
@@ -184,7 +198,10 @@ export default function Swap() {
         onSwap={handleSwap}
         loading={loading}
       />
+    </div>
 
+    {/* Right - Chart */}
+    <div>
       <SwapChart
         tokenA={tokenA}
         tokenB={tokenB}
@@ -193,13 +210,15 @@ export default function Swap() {
         onClearLive={() => setPriceHistory([])}
         loading={loadingTransactions}
       />
-
-      <div className="mt-10 bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Recent Transactions
-        </h3>
-        <TransactionList userAddress={address} transactions={transactions} />
-      </div>
     </div>
-  );
+
+    {/* Full-width TransactionList */}
+    <div className="lg:col-span-2 mt-10 bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+      <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        Public Transactions
+      </h3>
+      <TransactionList userAddress={address} transactions={transactions} />
+    </div>
+  </div>
+);
 }

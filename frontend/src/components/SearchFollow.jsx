@@ -7,29 +7,22 @@ export default function SearchFollow({ currentUserId }) {
   const [following, setFollowing] = useState([]);
 
   useEffect(() => {
-    // Fetch current user's following list
-    const fetchFollowing = async () => {
-      if (!currentUserId) return;
-      try {
-        const res = await axios.get(`http://localhost:5000/api/following/${currentUserId}`);
-        const followedIds = res.data.map((u) => u._id);
-        setFollowing(followedIds);
-      } catch (err) {
-        console.error("Failed to fetch following list", err);
-      }
-    };
-    fetchFollowing();
+    if (!currentUserId) return;
+    axios
+      .get(`https://metac-1.onrender.com/api/following/${currentUserId}`)
+      .then((res) => setFollowing(res.data.map((u) => u._id)))
+      .catch((err) => console.error("Failed to fetch following list", err));
   }, [currentUserId]);
 
   const search = async () => {
     if (!query.trim()) return;
-    const res = await axios.get(`http://localhost:5000/api/users/search?query=${query}`);
+    const res = await axios.get(`https://metac-1.onrender.com/api/users/search?query=${query}`);
     setResults(res.data || []);
   };
 
   const followUser = async (targetUserId) => {
     try {
-      await axios.post(`http://localhost:5000/api/follow/${targetUserId}`, {
+      await axios.post(`https://metac-1.onrender.com/api/follow/${targetUserId}`, {
         followerId: currentUserId,
       });
       setFollowing((prev) => [...prev, targetUserId]);
@@ -39,50 +32,58 @@ export default function SearchFollow({ currentUserId }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-12 p-6 bg-white rounded-3xl shadow-md border border-gray-200">
-      <h3 className="text-xl font-semibold mb-4 text-gray-800">🔍 Search & Follow Users</h3>
+    <div className="w-full max-w-3xl mx-auto mt-4 p-6 bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-purple-100">
+      <h3 className="text-xl font-bold text-purple-700 flex items-center justify-center gap-2 mb-4">
+      Discover & Follow Traders
+      </h3>
 
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          className="flex-1 border border-gray-300 rounded-lg p-2"
-          placeholder="Search usernames (e.g. dhruv)"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            className="w-full pl-10 pr-4 py-2 border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none bg-white shadow-sm"
+            placeholder="Search by username"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400">
+            <svg width="20" height="20" fill="none" stroke="currentColor">
+              <circle cx="9" cy="9" r="7" strokeWidth="2" />
+              <path d="M15 15l4 4" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </span>
+        </div>
         <button
           onClick={search}
-          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+          className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-5 py-2 rounded-xl font-semibold shadow hover:from-purple-600 hover:to-blue-600 transition"
         >
           Search
         </button>
       </div>
 
-      {results.length > 0 ? (
-        <ul className="space-y-4">
+      {results.length > 0 && (
+        <ul className="mt-6 space-y-3">
           {results.map((user) => (
             <li
               key={user._id}
-              className="flex items-center justify-between border-b pb-3"
+              className="flex items-center justify-between bg-white/80 rounded-xl px-4 py-3 shadow-sm border border-purple-50"
             >
               <div className="flex items-center gap-3">
                 <img
                   src={user.profileImage || "/default-avatar.png"}
                   alt="pfp"
-                  className="w-10 h-10 rounded-full"
+                  className="w-10 h-10 rounded-full border border-purple-200"
                 />
                 <div>
                   <div className="font-medium text-gray-800">{user.username}</div>
-                  <div className="text-sm text-gray-500">{user.bio || "No bio"}</div>
                 </div>
               </div>
-
               {following.includes(user._id) ? (
-                <span className="text-sm text-green-600">Following ✅</span>
+                <span className="text-xs text-green-600 bg-green-50 px-3 py-1 rounded-lg">Following</span>
               ) : (
                 <button
                   onClick={() => followUser(user._id)}
-                  className="text-sm bg-purple-500 text-white px-3 py-1 rounded-lg hover:bg-purple-600"
+                  className="text-xs font-semibold bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-1.5 rounded-lg shadow hover:from-purple-600 hover:to-blue-600 transition"
                 >
                   Follow
                 </button>
@@ -90,8 +91,10 @@ export default function SearchFollow({ currentUserId }) {
             </li>
           ))}
         </ul>
-      ) : (
-        <div className="text-sm text-gray-500">No users found yet.</div>
+      )}
+
+      {results.length === 0 && (
+        <p className="text-center text-sm text-gray-400 mt-4">No users found yet.</p>
       )}
     </div>
   );

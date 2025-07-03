@@ -16,7 +16,7 @@ const statsRoutes = require("./routes/statsRoutes");
 const feedRoutes = require("./routes/feedRoutes");
 const followRoutes = require("./routes/followRoutes"); // ✅ NEW
 const reputationRoutes = require('./routes/reputationRoutes');
-
+const authRoutes = require("./routes/authRoutes");
 // ✅ Route usage
 app.use("/api/users", userRoutes);
 app.use("/api/swaps", swapRoutes);
@@ -26,7 +26,7 @@ app.use("/api/stats", statsRoutes);
 app.use("/api/feed", feedRoutes);
 app.use("/api", followRoutes); // ✅ Mount all follow-related routes here
 app.use('/api/reputation', reputationRoutes);
-
+app.use("/api/auth", authRoutes); // ✅ Add this line
 // Health check
 app.get("/ping", (req, res) => res.status(200).send("pong"));
 app.get("/", (req, res) => res.send("✅ MetaCow backend is live"));

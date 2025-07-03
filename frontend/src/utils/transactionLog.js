@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 const tokenList = [
   { symbol: "TKA", address: "0x1e792D4c34c3d04Bd127aFEf0c1696E912c755aa" },
   { symbol: "TKB", address: "0x9e53abdDBFa9DC6A9bCD9D0e5DD7144F2701718D" },
-  { symbol: "USDT", address: "0xD9b7b6a9146291f87ea383E47Bf7FEc6b707e699" },
+  { symbol: "USDT", address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" },
   { symbol: "MOO", address: "0xA18938653750B70DCBbC0DF5a03D9F2e5958D8E8" },
 ];
 async function getBlockTimestamp(provider, blockNumber) {
@@ -96,7 +96,7 @@ export async function getAllUserSwaps(userAddress, limit = 100) {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/api/swaps/recent?user=${userAddress}&limit=${limit}`
+      `https://metac-1.onrender.com/api/swaps/recent?user=${userAddress}&limit=${limit}`
     );
     if (!res.ok) throw new Error("Backend fetch failed");
     const data = await res.json();
@@ -114,7 +114,7 @@ export async function getAllUserSwaps(userAddress, limit = 100) {
 
 export async function getAllSwapsAcrossPairs(limit = 50) {
   try {
-    const res = await fetch(`http://localhost:5000/api/swaps/recent?limit=${limit}`);
+    const res = await fetch(`https://metac-1.onrender.com/api/swaps/recent?limit=${limit}`);
     if (!res.ok) throw new Error("Backend fetch failed");
     const data = await res.json();
 
@@ -131,7 +131,7 @@ export async function getAllSwapsAcrossPairs(limit = 50) {
 
 export async function saveSwapToBackend(swapData) {
   try {
-    const res = await fetch("http://localhost:5000/api/swaps", {
+    const res = await fetch("https://metac-1.onrender.com/api/swaps", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(swapData),

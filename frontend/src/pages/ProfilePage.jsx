@@ -10,7 +10,7 @@ import SocialFeed from "../components/profile/SocialFeed";
 import RegisterProfile from "../components/profile/RegisterProfile";
 
 import { FACTORY_ADDRESS, FACTORY_ABI, PAIR_ABI } from "../utils/constants";
-import { Interface } from "ethers"; // needed for ABI fragment detection
+import { Interface } from "ethers";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -25,7 +25,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/wallet/${address}`);
+        const res = await axios.get(`https://metac-1.onrender.com/api/users/wallet/${address}`);
         setUser(res.data);
       } catch (err) {
         console.error("User fetch error:", err);
@@ -43,7 +43,6 @@ export default function ProfilePage() {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const factory = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, provider);
         const iface = new Interface(PAIR_ABI);
-
         const pairCount = await factory.allPairsLength();
         let totalScore = 0;
 
@@ -51,15 +50,8 @@ export default function ProfilePage() {
           const pairAddr = await factory.allPairs(i);
           const pair = new ethers.Contract(pairAddr, PAIR_ABI, provider);
 
-          // 👇 Check if function exists in ABI
-          const supportsReputation = iface.fragments.some(
-            (f) => f.name === "getReputationScore"
-          );
-
-          if (!supportsReputation) {
-            console.warn(`⚠️ Skipping pair ${pairAddr}, no getReputationScore`);
-            continue;
-          }
+          const supportsReputation = iface.fragments.some((f) => f.name === "getReputationScore");
+          if (!supportsReputation) continue;
 
           try {
             const score = await pair.getReputationScore(address);
@@ -79,43 +71,20 @@ export default function ProfilePage() {
   }, [address]);
 
   if (!isConnected) {
-    return (
-      <div className="text-center py-20 text-gray-500">
-        🔌 Connect your wallet to view your profile.
-      </div>
-    );
+    return <div className="text-center py-20 text-gray-500">🔌 Connect your wallet to view your profile.</div>;
   }
 
   if (loading) {
-    return (
-      <div className="text-center mt-12 text-gray-500">
-        ⏳ Loading profile...
-      </div>
-    );
+    return <div className="text-center mt-12 text-gray-500">⏳ Loading profile...</div>;
   }
 
   if (!user) {
     return <RegisterProfile wallet={address} onRegister={setUser} />;
   }
 
-  if (!user.username) {
-    return (
-      <div className="text-center py-20">
-        ⚠️ User loaded but missing username
-        <pre className="mt-4 p-4 text-left bg-gray-100 rounded-xl text-sm max-w-xl mx-auto">
-          {JSON.stringify(user, null, 2)}
-        </pre>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <ProfileHeader
-        user={user}
-        reputation={reputation}
-        onEdit={() => setEditing(true)}
-      />
+    <div className="max-w-6xl mx-auto p-6 space-y-8">
+      <ProfileHeader user={user} reputation={reputation} onEdit={() => setEditing(true)} />
 
       {editing && (
         <ProfileEdit
@@ -128,8 +97,15 @@ export default function ProfilePage() {
         />
       )}
 
-      <RecentActivity wallet={address} />
-      <SocialFeed wallet={address} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="overflow-hidden bg-white rounded-2xl shadow border p-4">
+          <RecentActivity wallet={address} />
+        </div>
+
+        <div className="overflow-hidden bg-white rounded-2xl shadow border p-4">
+          <SocialFeed wallet={address} />
+        </div>
+      </div>
     </div>
   );
 }

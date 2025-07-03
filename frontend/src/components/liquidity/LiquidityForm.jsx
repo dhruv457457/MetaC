@@ -24,39 +24,53 @@ export default function LiquidityForm({
   setLoading
 }) {
   const [activeTab, setActiveTab] = useState("add");
+const TOKEN_DECIMALS = {
+  USDC: 6,
+  USDT: 6,
+  TKA: 18,
+  TKB: 18,
+  MOO: 18,
+  ETH: 18,
+};
 
   const handleAdd = async () => {
-    if (!pairAddress || !tokenA || !tokenB || !signer) {
-      showWarning("Please select tokens and ensure wallet is connected.");
-      return;
-    }
+  if (!pairAddress || !tokenA || !tokenB || !signer) {
+    showWarning("Please select tokens and ensure wallet is connected.");
+    return;
+  }
 
-    const numAmountA = parseFloat(amountA);
-    const numAmountB = parseFloat(amountB);
-    if (
-      !amountA || !amountB || isNaN(numAmountA) || isNaN(numAmountB) ||
-      numAmountA <= 0 || numAmountB <= 0
-    ) {
-      showWarning("Enter valid amounts > 0.");
-      return;
-    }
+  const numAmountA = parseFloat(amountA);
+  const numAmountB = parseFloat(amountB);
+  if (
+    !amountA || !amountB || isNaN(numAmountA) || isNaN(numAmountB) ||
+    numAmountA <= 0 || numAmountB <= 0
+  ) {
+    showWarning("Enter valid amounts > 0.");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      const parsedA = ethers.parseUnits(amountA, 18);
-      const parsedB = ethers.parseUnits(amountB, 18);
-      await addLiquidity(pairAddress, parsedA, parsedB, tokenA.address, tokenB.address);
-      showSuccess("Liquidity added!");
-      setAmountA("");
-      setAmountB("");
-      onTxUpdate?.();
-    } catch (err) {
-      console.error("Add liquidity error:", err);
-      showError("Add failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+
+    const decimalsA = TOKEN_DECIMALS[tokenA.symbol] || 18;
+    const decimalsB = TOKEN_DECIMALS[tokenB.symbol] || 18;
+
+    const parsedA = ethers.parseUnits(amountA, decimalsA);
+    const parsedB = ethers.parseUnits(amountB, decimalsB);
+
+    await addLiquidity(pairAddress, parsedA, parsedB, tokenA.address, tokenB.address);
+    showSuccess("Liquidity added!");
+    setAmountA("");
+    setAmountB("");
+    onTxUpdate?.();
+  } catch (err) {
+    console.error("Add liquidity error:", err);
+    showError("Add failed.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleRemove = async () => {
     const numAmountLP = parseFloat(amountLP);

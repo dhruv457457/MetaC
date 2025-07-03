@@ -1,4 +1,3 @@
-// pages/Liquidity.jsx
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "../contexts/WalletContext";
@@ -16,9 +15,19 @@ const address = walletData?.address;
 const signer = walletData?.signer;
 const isConnected = !!address;
 
+const DEFAULT_TOKENS = {
+  TKA: {
+    symbol: "TKA",
+    address: "0x1e792D4c34c3d04Bd127aFEf0c1696E912c755aa",
+  },
+  TKB: {
+    symbol: "TKB",
+    address: "0x9e53abdDBFa9DC6A9bCD9D0e5DD7144F2701718D",
+  },
+};
 
-  const [tokenA, setTokenA] = useState(null);
-  const [tokenB, setTokenB] = useState(null);
+   const [tokenA, setTokenA] = useState(DEFAULT_TOKENS.TKA);
+  const [tokenB, setTokenB] = useState(DEFAULT_TOKENS.TKB);
   const [amountA, setAmountA] = useState("");
   const [amountB, setAmountB] = useState("");
   const [amountLP, setAmountLP] = useState("");
@@ -79,7 +88,7 @@ const isConnected = !!address;
 
   if (!isConnected) {
     return (
-      <div className="max-w-2xl mx-auto mt-12">
+      <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 text-center">
           <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-3xl">💧</span>
