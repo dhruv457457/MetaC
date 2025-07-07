@@ -6,17 +6,24 @@ MetaCow is a decentralized exchange that blends token swaps, liquidity provision
 > 🎥 **Video Demo:** [YouTube](https://youtu.be/mpHBX2n_N4s?feature=shared)  
 > ⛓️ **Chain:** Sepolia Testnet  
 
-> 🧑‍💻 **Deployer:** `0xF8A440f0c3912F42dF794983B8164cB6572fCBCC`  
-> 🏗 **Pair Logic:** `0x08B31808f3E5f3B2Ce90b4067D475F92D02ceE31`  
-> 🏭 **Factory Proxy:** `0x3048E6BFA6D505ad07D29284b6bA22521A80D06F`  
-> 💵 **USDC (Circle Faucet):** `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238` 
-> **Tokens**const tokenList** = `[
- > { symbol: "TKA", address: "0x1e792D4c34c3d04Bd127aFEf0c1696E912c755aa" },
-  > { symbol: "TKB", address: "0x9e53abdDBFa9DC6A9bCD9D0e5DD7144F2701718D" },
-  > { symbol: "USDT", address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" },
-  > { symbol: "MOO", address: "0xA18938653750B70DCBbC0DF5a03D9F2e5958D8E8" },
-];`
+## 📦 Contracts
 
+| Item                | Address                                                                 |
+|---------------------|-------------------------------------------------------------------------|
+| 🧑‍💻 Deployer        | `0xF8A440f0c3912F42dF794983B8164cB6572fCBCC`                             |
+| 🏗 Pair Logic       | `0x08B31808f3E5f3B2Ce90b4067D475F92D02ceE31`                             |
+| 🏭 Factory Proxy    | `0x3048E6BFA6D505ad07D29284b6bA22521A80D06F`                             |
+| 💵 USDC Token       | `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238` (Circle Faucet Token)       |
+
+### 🪙 Supported Tokens
+
+```js
+const tokenList = [
+  { symbol: "TKA", address: "0x1e792D4c34c3d04Bd127aFEf0c1696E912c755aa" },
+  { symbol: "TKB", address: "0x9e53abdDBFa9DC6A9bCD9D0e5DD7144F2701718D" },
+  { symbol: "USDT", address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" },
+  { symbol: "MOO", address: "0xA18938653750B70DCBbC0DF5a03D9F2e5958D8E8" },
+];
 ---
 
 ## 🚀 What We Built
